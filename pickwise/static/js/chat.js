@@ -26,13 +26,37 @@ function wrapInContainer(el) {
     return container;
 }
 
+function escapeHtml(text) {
+    return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+}
+
+function formatBotMessageToHtml(text) {
+    // Safe mini-markdown:
+    // - Escape HTML
+    // - Convert **bold** to <strong>
+    // - Convert newlines to <br>
+    let html = escapeHtml(text);
+    html = html.replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    html = html.replace(/\n/g, "<br>");
+    return html;
+}
+
 function renderMessage(role, content, ts) {
     const row = document.createElement("div");
     row.className = `message-row ${role}`;
 
     const bubble = document.createElement("div");
     bubble.className = `message-bubble ${role}`;
-    bubble.textContent = content;
+    if (role === "bot") {
+        bubble.innerHTML = formatBotMessageToHtml(content);
+    } else {
+        bubble.textContent = content;
+    }
     row.appendChild(bubble);
 
     if (ts) {
@@ -57,7 +81,8 @@ function showTypingIndicator() {
     const span = document.createElement("div");
     span.id = "typing-indicator";
     span.className = "typing-indicator";
-    span.textContent = "PickWise is generating a response…";
+    // Dota-themed tactical typing indicator
+    span.textContent = "Scanning hero data…";
     row.appendChild(span);
     chatLogEl.appendChild(wrapInContainer(row));
     scrollToBottom();
@@ -187,6 +212,22 @@ if (sidebarOverlayEl) {
     sidebarOverlayEl.addEventListener("click", closeSidebarMobile);
 }
 
+// Quick suggestion chips -> fill input and send
+function wireSuggestionChips() {
+    const chips = document.querySelectorAll(".suggestion-chip");
+    if (!chips || chips.length === 0) return;
+    chips.forEach((chip) => {
+        chip.addEventListener("click", () => {
+            const text = chip.getAttribute("data-suggestion") || chip.textContent || "";
+            if (!inputEl) return;
+            inputEl.value = text.trim();
+            autoExpandInput();
+            inputEl.focus();
+            sendMessage();
+        });
+    });
+}
+
 function applyTheme(theme) {
     const body = document.body;
     if (!body) return;
@@ -236,4 +277,7 @@ if (themeToggleEl) {
     });
 }
 
-window.addEventListener("DOMContentLoaded", loadThemePreference);
+window.addEventListener("DOMContentLoaded", () => {
+    loadThemePreference();
+    wireSuggestionChips();
+});

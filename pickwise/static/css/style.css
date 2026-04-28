@@ -1,4 +1,4 @@
-/* PickWise – ChatGPT-style dark UI */
+/* PickWise – Dota 2 tactical HUD UI (red + charcoal) */
 
 *,
 *::before,
@@ -8,20 +8,28 @@
 
 /* Theme variables */
 :root {
-    /* Dark theme (default) */
-    --bg-primary: #0d0d0d;
-    --bg-secondary: #171717;
-    --bg-tertiary: #262626;
-    --bg-elevated: #2a2a2a;
-    --border: #2e2e2e;
-    --text-primary: #ececec;
-    --text-secondary: #a1a1a1;
-    --text-muted: #737373;
-    --accent: #10a37f;
-    --accent-hover: #0d8c6d;
-    --user-bubble: #2f2f2f;
-    --bot-bubble: #262626;
-    --shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    /* Dark Dota theme (default) */
+    --bg-primary: #0b0b0f;
+    --bg-secondary: #111117;
+    --bg-tertiary: #161622;
+    --bg-elevated: #1a1a26;
+    --border: rgba(255, 255, 255, 0.08);
+    --text-primary: #f2f2f2;
+    --text-secondary: rgba(242, 242, 242, 0.75);
+    --text-muted: rgba(242, 242, 242, 0.55);
+
+    --accent: #b30000;          /* deep red */
+    --accent-2: #ff3b30;        /* glow red */
+    --accent-warm: #ff7a18;     /* warm orange highlight */
+    --accent-hover: #d10000;
+
+    --user-bubble: rgba(22, 22, 34, 0.92);
+    --bot-bubble: rgba(17, 17, 23, 0.92);
+
+    --shadow: 0 10px 26px rgba(0, 0, 0, 0.45);
+    --glow-red: 0 0 0 1px rgba(179, 0, 0, 0.35), 0 0 22px rgba(255, 59, 48, 0.16);
+    --glow-red-strong: 0 0 0 1px rgba(255, 59, 48, 0.5), 0 0 26px rgba(255, 59, 48, 0.28);
+
     --radius: 12px;
     --radius-sm: 8px;
     --radius-lg: 18px;
@@ -32,21 +40,20 @@
     --font: "Inter", system-ui, -apple-system, sans-serif;
 }
 
-/* Light theme overrides */
+/* If you keep the theme toggle, \"light\" becomes a brighter crimson variant (still Dota-themed). */
 body.theme-light {
-    --bg-primary: #f7f7f7;
-    --bg-secondary: #ffffff;
-    --bg-tertiary: #f0f0f0;
-    --bg-elevated: #ffffff;
-    --border: #dadada;
-    --text-primary: #111111;
-    --text-secondary: #333333;
-    --text-muted: #777777;
-    --accent: #0f766e;
-    --accent-hover: #0d5e58;
-    --user-bubble: #e3f2fd;
-    --bot-bubble: #ffffff;
-    --shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+    --bg-primary: #101015;
+    --bg-secondary: #15151c;
+    --bg-tertiary: #1c1c26;
+    --bg-elevated: #21212e;
+    --border: rgba(255, 255, 255, 0.10);
+    --text-primary: #f7f7f7;
+    --text-secondary: rgba(247, 247, 247, 0.78);
+    --text-muted: rgba(247, 247, 247, 0.58);
+    --accent: #8b0000;
+    --accent-2: #ff3b30;
+    --accent-warm: #ff8a3d;
+    --accent-hover: #b30000;
 }
 
 html,
@@ -60,9 +67,25 @@ body {
     font-size: 15px;
     line-height: 1.6;
     color: var(--text-primary);
-    background: var(--bg-primary);
+    background: radial-gradient(1000px 600px at 20% 0%, rgba(179, 0, 0, 0.22), transparent 60%),
+        radial-gradient(800px 480px at 85% 10%, rgba(255, 122, 24, 0.10), transparent 55%),
+        radial-gradient(900px 540px at 50% 100%, rgba(179, 0, 0, 0.12), transparent 60%),
+        var(--bg-primary);
     overflow: hidden;
     transition: background 0.25s ease, color 0.25s ease;
+}
+
+/* Subtle smoky/metal texture overlay */
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    background:
+        linear-gradient(135deg, rgba(255,255,255,0.03), transparent 40%, rgba(255,255,255,0.02)),
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.015), rgba(255,255,255,0.015) 1px, transparent 1px, transparent 6px);
+    opacity: 0.35;
+    mix-blend-mode: overlay;
 }
 
 .app-shell {
@@ -76,8 +99,11 @@ body {
 .sidebar {
     width: var(--sidebar-width);
     min-width: var(--sidebar-width);
-    background: var(--bg-secondary);
-    border-right: 1px solid var(--border);
+    background:
+        radial-gradient(800px 260px at 50% -40%, rgba(179, 0, 0, 0.25), transparent 60%),
+        linear-gradient(180deg, rgba(255,255,255,0.03), transparent 28%),
+        var(--bg-secondary);
+    border-right: 1px solid rgba(179, 0, 0, 0.22);
     display: flex;
     flex-direction: column;
     padding: 12px;
@@ -193,9 +219,9 @@ body {
     width: 100%;
     padding: 10px 12px;
     margin-bottom: 16px;
-    border: 1px solid var(--border);
+    border: 1px solid rgba(179, 0, 0, 0.22);
     border-radius: var(--radius-sm);
-    background: transparent;
+    background: linear-gradient(180deg, rgba(255,255,255,0.02), transparent 60%);
     color: var(--text-primary);
     font-family: var(--font);
     font-size: 14px;
@@ -205,8 +231,11 @@ body {
 }
 
 .new-chat-btn:hover {
-    background: var(--bg-tertiary);
-    border-color: var(--text-muted);
+    background:
+        radial-gradient(420px 80px at 20% 50%, rgba(255, 59, 48, 0.20), transparent 60%),
+        var(--bg-tertiary);
+    border-color: rgba(255, 59, 48, 0.45);
+    box-shadow: var(--glow-red);
 }
 
 .sidebar-section-label {
@@ -241,8 +270,11 @@ body {
 }
 
 .chat-list-item.active {
-    background: var(--bg-elevated);
+    background:
+        linear-gradient(90deg, rgba(179, 0, 0, 0.25), transparent 55%),
+        var(--bg-elevated);
     color: var(--text-primary);
+    box-shadow: inset 0 0 0 1px rgba(255, 59, 48, 0.22);
 }
 
 .chat-list-item.deleting {
@@ -344,8 +376,11 @@ body {
     align-items: center;
     gap: 12px;
     padding: 12px 16px;
-    border-bottom: 1px solid var(--border);
-    background: var(--bg-primary);
+    border-bottom: 1px solid rgba(179, 0, 0, 0.18);
+    background:
+        radial-gradient(900px 160px at 50% -40%, rgba(179, 0, 0, 0.25), transparent 65%),
+        linear-gradient(180deg, rgba(255,255,255,0.03), transparent 60%),
+        var(--bg-primary);
     flex-shrink: 0;
 }
 
@@ -377,11 +412,58 @@ body {
     letter-spacing: -0.02em;
 }
 
+.chat-header-title::after {
+    content: " • LIVE STRATEGY";
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    font-size: 11px;
+    color: rgba(255, 122, 24, 0.75);
+    margin-left: 10px;
+    vertical-align: middle;
+}
+
+/* Quick suggestions */
+.quick-suggestions {
+    padding: 10px 16px 0;
+}
+
+.quick-suggestions-inner {
+    max-width: var(--content-max);
+    margin: 0 auto;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.suggestion-chip {
+    border: 1px solid rgba(179, 0, 0, 0.22);
+    background: rgba(17, 17, 23, 0.65);
+    color: var(--text-secondary);
+    border-radius: 999px;
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, transform 0.12s ease;
+    backdrop-filter: blur(6px);
+}
+
+.suggestion-chip:hover {
+    color: var(--text-primary);
+    border-color: rgba(255, 59, 48, 0.45);
+    box-shadow: var(--glow-red);
+    transform: translateY(-1px);
+}
+
+.suggestion-chip:focus-visible {
+    outline: 2px solid var(--accent-2);
+    outline-offset: 2px;
+}
+
 .chat-log {
     flex: 1;
     overflow-y: auto;
     overflow-x: hidden;
-    padding: 24px 16px 16px;
+    padding: 18px 16px 16px;
     display: flex;
     flex-direction: column;
     gap: 20px;
@@ -425,18 +507,24 @@ body {
     white-space: pre-wrap;
     word-break: break-word;
     box-shadow: var(--shadow);
+    backdrop-filter: blur(10px);
 }
 
 .message-bubble.user {
-    background: var(--user-bubble);
+    background:
+        radial-gradient(420px 110px at 80% 20%, rgba(255, 122, 24, 0.08), transparent 60%),
+        var(--user-bubble);
     color: var(--text-primary);
-    border: 1px solid var(--border);
+    border: 1px solid rgba(255, 255, 255, 0.08);
 }
 
 .message-bubble.bot {
-    background: var(--bot-bubble);
+    background:
+        radial-gradient(420px 110px at 20% 20%, rgba(179, 0, 0, 0.18), transparent 60%),
+        var(--bot-bubble);
     color: var(--text-primary);
-    border: 1px solid var(--border);
+    border: 1px solid rgba(179, 0, 0, 0.22);
+    box-shadow: var(--shadow), var(--glow-red);
 }
 
 .message-meta {
@@ -467,8 +555,10 @@ body {
 .chat-input-bar {
     flex-shrink: 0;
     padding: 16px;
-    background: var(--bg-primary);
-    border-top: 1px solid var(--border);
+    background:
+        radial-gradient(900px 160px at 50% 140%, rgba(179, 0, 0, 0.18), transparent 65%),
+        var(--bg-primary);
+    border-top: 1px solid rgba(179, 0, 0, 0.18);
 }
 
 .chat-input-bar .input-inner {
@@ -481,16 +571,18 @@ body {
     align-items: flex-end;
     gap: 8px;
     padding: 10px 14px;
-    background: var(--bg-secondary);
-    border: 1px solid var(--border);
+    background:
+        linear-gradient(180deg, rgba(255,255,255,0.03), transparent 60%),
+        rgba(17, 17, 23, 0.85);
+    border: 1px solid rgba(179, 0, 0, 0.22);
     border-radius: var(--radius-lg);
     box-shadow: var(--shadow);
     transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .input-wrapper:focus-within {
-    border-color: var(--text-muted);
-    box-shadow: 0 0 0 1px var(--text-muted);
+    border-color: rgba(255, 59, 48, 0.55);
+    box-shadow: var(--shadow), var(--glow-red-strong);
 }
 
 #chat-input {
@@ -522,15 +614,16 @@ body {
     padding: 0;
     border: none;
     border-radius: 8px;
-    background: var(--accent);
+    background: linear-gradient(180deg, rgba(255,255,255,0.10), transparent 50%), var(--accent);
     color: #fff;
     cursor: pointer;
     transition: background 0.15s ease, transform 0.1s ease;
 }
 
 .send-btn:hover:not(:disabled) {
-    background: var(--accent-hover);
-    transform: scale(1.02);
+    background: linear-gradient(180deg, rgba(255,255,255,0.14), transparent 55%), var(--accent-hover);
+    transform: scale(1.03);
+    box-shadow: var(--glow-red-strong);
 }
 
 .send-btn:disabled {
@@ -617,6 +710,15 @@ body {
     .chat-log {
         padding: 16px 12px 12px;
         gap: 16px;
+    }
+
+    .quick-suggestions {
+        padding: 8px 12px 0;
+    }
+
+    .suggestion-chip {
+        padding: 7px 10px;
+        font-size: 12.5px;
     }
 
     .message-bubble {

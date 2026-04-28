@@ -4,7 +4,7 @@ from typing import Optional
 
 import joblib
 
-from .text_preprocessing import preprocess_for_model, preprocess_text
+from .text_preprocessing import preprocess_for_model, preprocess_text, normalize_user_input
 from .entity_detection import HeroEntity, ItemEntity, detect_hero, detect_item
 from .triggers import match_intent_by_triggers
 
@@ -56,47 +56,27 @@ def is_greeting(text: str) -> bool:
     such as "hi", "hey", "hello", "yo", "sup", "👋", etc.
     Case‑insensitive, tolerant of punctuation, and biased toward very short inputs.
     """
-    if text is None:
-        return False
-    q = text.strip().lower()
+    q = normalize_user_input(text)
     if not q:
         return False
 
-    # Common greeting tokens and phrases
-    greeting_tokens = {
-        "hi",
-        "hey",
-        "hello",
-        "yo",
-        "hiya",
-        "sup",
-        "wassup",
-        "whats up",
-        "what's up",
-        "hola",
-        "bonjour",
-        "hallo",
-        "oi",
-        "yo!",
-    }
+    # Now that text is normalized, greeting detection can be simple and robust.
+    tokens = q.split()
+    joined = q.replace(" ", "")
 
-    # Strip simple punctuation around the word
-    simplified = "".join(ch for ch in q if ch.isalnum() or ch.isspace())
-
-    if simplified in greeting_tokens:
+    # Ultra-short greetings / typos / leetspeak after normalization
+    if joined in {"hi", "hii", "hiii", "hello", "helo", "hey", "heyy", "yo", "sup", "gm", "gn"}:
         return True
 
-    # Single emoji / wave / very short friendly signal
-    if q in {"👋", "🤚", "✋", "🖐", "👌", "🙌"}:
+    # Common greeting starts (covers hellooo/heyyy/hiiii etc.)
+    if joined.startswith(("hi", "hey", "hello", "helo", "yo", "sup", "hiya", "hai")):
         return True
 
-    # Very short messages (1–3 tokens) that contain a greeting word
-    tokens = simplified.split()
-    if 0 < len(tokens) <= 3 and any(t in greeting_tokens for t in tokens):
+    if joined in {"goodmorning", "goodafternoon", "goodevening"}:
         return True
 
-    # Extremely short alphabetic strings like "h", "yo", etc. treated as casual greeting
-    if len(q) <= 2 and q.isalpha():
+    # Very short messages (1–3 tokens) that contain a greeting token
+    if 0 < len(tokens) <= 3 and any(t in {"hi", "hello", "hey", "yo", "sup"} for t in tokens):
         return True
 
     return False
@@ -108,7 +88,7 @@ def is_self_intro_question(question: str) -> bool:
     what is PickWise, introduce yourself, etc.). Used to prioritize the
     self-introduction response over gameplay advice.
     """
-    q = question.lower().strip()
+    q = normalize_user_input(question)
     if not q:
         return False
     phrases = [

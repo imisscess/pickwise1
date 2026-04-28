@@ -9,6 +9,7 @@ from pickwise.utils.intent_classifier import (
     is_greeting,
     is_dota_related,
 )
+from pickwise.utils.text_preprocessing import normalize_user_input
 from pickwise.utils.triggers import match_intent_by_triggers
 from pickwise.utils.opendota_client import OpenDotaError
 from pickwise.utils.response_generator import (
@@ -34,7 +35,8 @@ def index():
 @app.route("/ask", methods=["POST"])
 def ask():
     data = request.get_json(force=True, silent=True) or {}
-    question = (data.get("question") or "").strip()
+    raw_question = (data.get("question") or "").strip()
+    question = normalize_user_input(raw_question)
     if not question:
         return jsonify({"answer": "Please ask a question about heroes, items, or strategy."}), 400
 
@@ -136,7 +138,8 @@ def chat():
         { "answer": "...", "intent": "...", "confidence": 0.0-1.0 }
     """
     data = request.get_json(force=True, silent=True) or {}
-    text = (data.get("message") or data.get("question") or "").strip()
+    raw_text = (data.get("message") or data.get("question") or "").strip()
+    text = normalize_user_input(raw_text)
     if not text:
         return jsonify({"answer": "Please provide a question for PickWise to answer."}), 400
 
